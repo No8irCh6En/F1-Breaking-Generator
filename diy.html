@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@poodrig">
+    <meta name="twitter:creator" content="@poodrig">
+    <meta name="twitter:title" content="F1News creator by poodrig">
+    <meta name="twitter:description" content="Easily create your own fake F1 News images (PC Only)">
+    <meta name="twitter:image" content="https://poodrig.com/js/uploads/60aa9afb5e4da.jpg">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>自定义设计 - F1 Breaking 生成工具</title>
+    <link type="text/css" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.min.css"
+        rel="stylesheet" crossorigin="anonymous">
+    <script type="text/javascript"
+        src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="css/f1news2.css">
+    <link rel="shortcut icon" type="image/x-icon" href="imgs/basic/f1.svg">
+    <script type="text/javascript"
+        src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/1.11.0/jquery.min.js"></script>
+    <script type="text/javascript"
+        src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 160vh;
+            padding-top: 5rem;
+            padding-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container" class="mb-3">
+        <div id="color"></div>
+        <img draggable="false" id="bg" src="imgs/basic/F1BG2.png" alt="Striped Background">
+        <img draggable="false" id="f1logo" src="imgs/basic/F1-Logo-Dark.png" alt="Formula 1 Logo">
+
+        <div id="imgdiv">
+            <img draggable="false" id="img" src="imgs/drivers/charles.jpg" alt="Main image">
+        </div>
+        <div id="top">
+            <label contenteditable="true" id="breaking">BREAKING</label>
+        </div>
+        <div id="corner">
+            <img draggable="false" id="team" src="imgs/teams/ferrari.png" alt="Team Logo">
+        </div>
+        <div id="bottom">
+            <label contenteditable="true" id="name">CHARLES LECLERC</label>
+            <label contenteditable="true" id="event">I AM STUPID... I AM STUPID...</label>
+        </div>
+    </div>
+
+    <div class="container " id="properties">
+        <div class="input-group input-group-sm mb-3">
+            <label for="colorpick" class="input-group-text">背景颜色</label>
+            <input type="color" class="form-control-sm form-control-color p-1 border bg-light" id="colorpick"
+                value="#E10600" title="选择背景颜色">
+            <button type="button" class="btn btn-dark btn-sm" id="textcolor">黑白转换</button>
+        </div>
+
+        <div class="input-group input-group-sm mb-3">
+            <label class="input-group-text">标识</label>
+            <input type="file" class="form-control" id="brandLogoUpload" title="上传标识" accept="image/*">
+            <label class="input-group-text">大小(%)</label>
+            <input type="number" class="form-control" id="inputF1LogoSize" value="30" style="max-width: 70px;">
+            <label class="input-group-text">X</label>
+            <input type="number" class="form-control" id="f1logoPosX" value="0" style="max-width: 70px;">
+            <label class="input-group-text">Y</label>
+            <input type="number" class="form-control" id="f1logoPosY" value="0" style="max-width: 70px;">
+        </div>
+
+        <div class="input-group input-group-sm mb-3">
+            <label class="input-group-text">角标</label>
+            <input type="file" class="form-control" id="logoUpload" title="上传角标" accept="image/*">
+            <label class="input-group-text">大小(%)</label>
+            <input type="number" class="form-control" id="inputTeamLogoSize" value="100" style="max-width: 70px;">
+            <label class="input-group-text">X</label>
+            <input type="number" class="form-control" id="teamPosX" value="0" style="max-width: 70px;">
+            <label class="input-group-text">Y</label>
+            <input type="number" class="form-control" id="teamPosY" value="0" style="max-width: 70px;">
+        </div>
+
+        <div class="input-group input-group-sm mb-3">
+            <label class="input-group-text">主图</label>
+            <input type="file" class="form-control" id="mainImgUpload" title="上传主图" accept="image/*">
+            <label class="input-group-text">大小(%)</label>
+            <input type="number" class="form-control" id="inputIMG" value="100" style="max-width: 70px;">
+            <label class="input-group-text">X</label>
+            <input type="number" class="form-control" id="imgPosX" value="0" style="max-width: 70px;">
+            <label class="input-group-text">Y</label>
+            <input type="number" class="form-control" id="imgPosY" value="0" style="max-width: 70px;">
+        </div>
+
+        <div class="input-group input-group-sm mb-3">
+            <label for="inputBR" class="input-group-text">标题字号</label>
+            <input type="number" class="form-control-sm form-control-color p-1 border bg-light" min="1" max="400"
+                value="120" id="inputBR" style="width: 60px;">
+        </div>
+
+        <div class="input-group input-group-sm mb-3">
+            <label for="inputNM" class="input-group-text">姓名字号</label>
+            <input type="number" class="form-control-sm form-control-color p-1 border bg-light" min="1" max="400"
+                value="80" id="inputNM" style="width: 60px;">
+        </div>
+
+        <div class="input-group input-group-sm mb-3">
+            <label for="inputEV" class="input-group-text">消息字号</label>
+            <input title="font-size" type="number" class="form-control-sm form-control-color p-1 border bg-light"
+                min="1" max="400" value="60" id="inputEV" style="width: 60px;">
+        </div>
+
+        <div class="d-grid gap-2 col-md-7">
+            <button type="button" class="btn btn-primary btn-sm" id="downloadBtn">生成并下载图像</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // --- 图片上传处理 ---
+            function setupImageUpload(inputId, imageId) {
+                $('#' + inputId).on('change', function(event) {
+                    if (event.target.files && event.target.files[0]) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            $('#' + imageId).attr('src', e.target.result);
+                        }
+                        reader.readAsDataURL(event.target.files[0]);
+                    }
+                });
+            }
+            setupImageUpload('brandLogoUpload', 'f1logo');
+            setupImageUpload('logoUpload', 'team');
+            setupImageUpload('mainImgUpload', 'img');
+
+            // --- 样式自定义处理 ---
+            // 大小控制
+            $('#inputF1LogoSize').on('input', e => $('#f1logo').css({'width': e.target.value + '%', 'height': 'auto'}));
+            $('#inputTeamLogoSize').on('input', e => $('#team').css({'width': e.target.value + '%', 'height': 'auto'}));
+            $('#inputIMG').on('input', e => $('#img').css({'width': e.target.value + '%', 'height': 'auto'}));
+            
+            // 颜色控制
+            $('#colorpick').on('input', e => $('#color').css('background-color', e.target.value));
+
+            // 位置控制 (X/Y轴)
+            function setupPositionControls(elementId, inputXId, inputYId) {
+                const element = $('#' + elementId);
+                const inputX = $('#' + inputXId);
+                const inputY = $('#' + inputYId);
+                let position = { x: inputX.val() || 0, y: inputY.val() || 0 };
+
+                function updateTransform() {
+                    element.css('transform', `translate(${position.x}px, ${position.y}px)`);
+                }
+                inputX.on('input', function(e) {
+                    position.x = e.target.value;
+                    updateTransform();
+                });
+                inputY.on('input', function(e) {
+                    position.y = e.target.value;
+                    updateTransform();
+                });
+                
+                // 在页面加载时立即应用一次初始位置
+                updateTransform();
+            }
+            setupPositionControls('f1logo', 'f1logoPosX', 'f1logoPosY');
+            setupPositionControls('team', 'teamPosX', 'teamPosY');
+            setupPositionControls('img', 'imgPosX', 'imgPosY');
+
+            // 字号控制
+            $('#inputBR').on('input', e => $('#breaking').css('font-size', e.target.value + 'px'));
+            $('#inputNM').on('input', e => $('#name').css('font-size', e.target.value + 'px'));
+            $('#inputEV').on('input', e => $('#event').css('font-size', e.target.value + 'px'));
+
+            // 黑白文字切换
+            $('#textcolor').on('click', function() {
+                ['#breaking', '#name', '#event'].forEach(id => {
+                    const currentColor = $(id).css('color');
+                    const newColor = (currentColor === 'rgb(0, 0, 0)') ? '#FFFFFF' : '#000000';
+                    $(id).css('color', newColor);
+                });
+            });
+
+            // --- 生成与下载逻辑 ---
+            $('#downloadBtn').on('click', function() {
+                var btn = $(this);
+                var node = document.getElementById('container');
+
+                btn.text('正在生成...').addClass('disabled');
+
+                domtoimage.toPng(node, {
+                    quality: 1.0,
+                    width: node.clientWidth,
+                    height: node.clientHeight
+                })
+                .then(function(dataUrl) {
+                    // 创建一个临时的 a 标签来触发下载
+                    var link = document.createElement('a');
+                    link.download = 'f1-breaking-news.png';
+                    link.href = dataUrl;
+                    document.body.appendChild(link); // Firefox 需要将链接添加到 DOM 中
+                    link.click();
+                    document.body.removeChild(link);
+
+                    btn.text('生成并下载图像').removeClass('disabled');
+                })
+                .catch(function(error) {
+                    console.error('渲染失败!', error);
+                    alert('抱歉，图片生成失败，请查看控制台获取错误信息。');
+                    btn.text('生成并下载图像').removeClass('disabled');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
