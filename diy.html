@@ -66,6 +66,29 @@
         </div>
 
         <div class="input-group input-group-sm mb-3">
+            <label for="bgStyleSelect" class="input-group-text">背景样式</label>
+            <select class="form-select" id="bgStyleSelect" style="max-width: 150px;">
+                <option value="default">默认条纹</option>
+                <option value="solid">纯色背景</option>
+                <option value="gradient">渐变背景</option>
+                <option value="stripes">双色条纹</option>
+                <option value="custom">自定义图片</option>
+            </select>
+            
+            <!-- 条纹控件，默认隐藏 -->
+            <label for="stripeColor1" class="input-group-text ms-2 d-none stripe-control">条纹颜色1</label>
+            <input type="color" class="form-control-sm form-control-color p-1 border bg-light d-none stripe-control" id="stripeColor1"
+                value="#1E3A96" title="选择第一种条纹颜色">
+            <label for="stripeColor2" class="input-group-text ms-2 d-none stripe-control">条纹颜色2</label>
+            <input type="color" class="form-control-sm form-control-color p-1 border bg-light d-none stripe-control" id="stripeColor2"
+                value="#0066CC" title="选择第二种条纹颜色">
+            <label for="stripeWidth" class="input-group-text ms-2 d-none stripe-control">条纹宽度</label>
+            <input type="number" class="form-control d-none stripe-control" id="stripeWidth" value="80" min="20" max="200" style="max-width: 70px;">
+
+            <input type="file" class="form-control d-none" id="customBgUpload" accept="image/*" title="上传背景图片">
+        </div>
+
+        <div class="input-group input-group-sm mb-3">
             <label class="input-group-text">标识</label>
             <input type="file" class="form-control" id="brandLogoUpload" title="上传标识" accept="image/*">
             <label class="input-group-text">大小(%)</label>
@@ -148,6 +171,110 @@
             // 颜色控制
             $('#colorpick').on('input', e => $('#color').css('background-color', e.target.value));
 
+            // 自定义背景图片上传
+            $('#customBgUpload').on('change', function(event) {
+                if (event.target.files && event.target.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#color').css({
+                            'background-image': `url(${e.target.result})`,
+                            'background-size': 'cover',
+                            'background-position': 'center',
+                            'background-repeat': 'no-repeat'
+                        });
+                    }
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            });
+
+            // 条纹颜色和宽度控制
+            $('#stripeColor1, #stripeColor2, #stripeWidth').on('input', function() {
+                if ($('#bgStyleSelect').val() === 'stripes') {
+                    updateStripes();
+                }
+            });
+
+            // 双色条纹更新函数
+            function updateStripes() {
+                const color1 = $('#stripeColor1').val();
+                const color2 = $('#stripeColor2').val();
+                const width = $('#stripeWidth').val();
+                
+                // 获取容器的尺寸作为参考
+                const container = $('#container');
+                
+                $('#color').css({
+                    'background': `repeating-linear-gradient(
+                        -45deg,
+                        ${color1} 0px,
+                        ${color1} ${width}px,
+                        ${color2} ${width}px,
+                        ${color2} ${width * 2}px
+                    )`,
+                    'width': container.width() + 'px',
+                    'height': container.height() + 'px',
+                    'position': 'absolute',
+                    'top': '0',
+                    'left': '0',
+                    'z-index': '1'
+                });
+            }
+
+            // 背景样式控制
+            $('#bgStyleSelect').on('change', function() {
+                const selectedStyle = $(this).val();
+                const bgElement = $('#bg');
+                const colorElement = $('#color');
+                const customUpload = $('#customBgUpload');
+                const stripesControls = $('.stripe-control'); // 通过类名选择所有条纹控件
+
+                // 重置 #color 元素的样式
+                colorElement.css({
+                    'background': '',
+                    'background-image': '',
+                    'background-size': '',
+                    'background-position': '',
+                    'background-repeat': ''
+                });
+
+                // 隐藏所有特殊控件
+                customUpload.addClass('d-none');
+                stripesControls.addClass('d-none');
+
+                // 清除可能由条纹模式添加的样式
+                if (selectedStyle !== 'stripes') {
+                    colorElement.css({
+                        'width': '', 'height': '', 'position': '',
+                        'top': '', 'left': '', 'z-index': ''
+                    });
+                }
+
+                switch(selectedStyle) {
+                    case 'default':
+                        bgElement.attr('src', 'imgs/basic/F1BG2.png').show();
+                        break;
+                    case 'solid':
+                        bgElement.hide();
+                        colorElement.css('background', $('#colorpick').val());
+                        break;
+                    case 'gradient':
+                        bgElement.hide();
+                        const color = $('#colorpick').val();
+                        colorElement.css('background', `linear-gradient(135deg, ${color}, #000000)`);
+                        break;
+                    case 'stripes':
+                        bgElement.hide();
+                        stripesControls.removeClass('d-none'); // 显示所有条纹控件
+                        updateStripes();
+                        break;
+                    case 'custom':
+                        bgElement.hide();
+                        customUpload.removeClass('d-none');
+                        break;
+                }
+            });
+
+
             // 位置控制 (X/Y轴)
             function setupPositionControls(elementId, inputXId, inputYId) {
                 const element = $('#' + elementId);
@@ -179,13 +306,26 @@
             $('#inputNM').on('input', e => $('#name').css('font-size', e.target.value + 'px'));
             $('#inputEV').on('input', e => $('#event').css('font-size', e.target.value + 'px'));
 
-            // 黑白文字切换
+            // 黑白文字与Logo切换
             $('#textcolor').on('click', function() {
+                // 判断当前文本颜色，以决定新颜色
+                const isCurrentlyBlack = $('#breaking').css('color') === 'rgb(0, 0, 0)';
+                const newTextColor = isCurrentlyBlack ? '#FFFFFF' : '#000000';
+
+                // 应用新颜色到所有文本元素
                 ['#breaking', '#name', '#event'].forEach(id => {
-                    const currentColor = $(id).css('color');
-                    const newColor = (currentColor === 'rgb(0, 0, 0)') ? '#FFFFFF' : '#000000';
-                    $(id).css('color', newColor);
+                    $(id).css('color', newTextColor);
                 });
+
+                // 获取当前F1 Logo的源文件路径
+                const f1LogoSrc = $('#f1logo').attr('src');
+                const originalF1LogoPath = 'imgs/basic/F1-Logo-Dark.png';
+
+                // 当且仅当使用的是原始F1 Logo时，才进行颜色转换
+                if (f1LogoSrc.includes(originalF1LogoPath)) {
+                    const logoFilter = isCurrentlyBlack ? 'brightness(0) invert(1)' : 'none';
+                    $('#f1logo').css('filter', logoFilter);
+                }
             });
 
             // --- 生成与下载逻辑 ---
